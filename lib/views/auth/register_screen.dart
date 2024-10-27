@@ -6,11 +6,10 @@ import 'package:interview_task/custom_widget/des_title.dart';
 import 'package:interview_task/custom_widget/up_title.dart';
 import 'package:interview_task/firebase_services/firebase-auth-services.dart';
 import 'package:interview_task/views/auth/login.dart';
-
 import '../../custom_widget/custom_field.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -18,8 +17,8 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final FirebaseAuthService _auth = FirebaseAuthService();
-
-  final GlobalKey<FormState> Reskey = GlobalKey<FormState>();
+  String  name = "",email = "",phone = "", password = "";
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -27,11 +26,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _passController.dispose();
+    super.dispose();
   }
 
   String? _validateName(String? value) {
@@ -43,7 +42,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter an Email';
+      return 'Please enter an email';
     }
     RegExp emailReg = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailReg.hasMatch(value)) {
@@ -72,23 +71,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return null;
   }
 
-  void _signUp() async {
-    if (Reskey.currentState!.validate()) {
-      String userName = _nameController.text;
-      String emailAddress = _emailController.text;
-      String phoneNumber = _phoneController.text;
-      String password = _passController.text;
+  Future<void> _signUp() async {
+    if (_formKey.currentState!.validate()) {
+      String userName = _nameController.text.trim();
+      String emailAddress = _emailController.text.trim();
+      String phoneNumber = _phoneController.text.trim();
+      String password = _passController.text.trim();
 
-      User? user = await _auth.signUpWithEmailAndPassword(
-          userName, emailAddress, phoneNumber, password);
+      try {
+        print('Attempting sign up...');
+        User? user = await _auth.signUpWithEmailAndPassword(
+          userName,
+          emailAddress,
+          phoneNumber,
+          password,
+        );
 
-      if (user != null) {
-        Get.to(() => const LoginScreen());
-      } else {
-        Get.snackbar('Error', 'Sorry! Unable to sign up');
+        if (user != null) {
+          Get.to(() => const LoginScreen());
+        } else {
+          Get.snackbar('Error', 'Sorry! Unable to sign up');
+        }
+      } catch (e) {
+        print('Sign up error: $e');
+        Get.snackbar('Sign Up Error', e.toString());
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,49 +108,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: Form(
-              key: Reskey,
+              key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 50),
-                  UpTitle(),
-                  SizedBox(height: 25),
-                  DesTitle(title: 'Enter your Name'),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 50),
+                  const UpTitle(),
+                  const SizedBox(height: 25),
+                  const DesTitle(title: 'Enter your Name'),
+                  const SizedBox(height: 5),
                   CustomTextField(
                     hintText: 'Input your name',
                     validator: _validateName,
                     controller: _nameController,
                   ),
-                  SizedBox(height: 20),
-                  DesTitle(title: 'Email Address'),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 20),
+                  const DesTitle(title: 'Email Address'),
+                  const SizedBox(height: 5),
                   CustomTextField(
                     hintText: 'Input your email',
                     validator: _validateEmail,
                     controller: _emailController,
                   ),
-                  SizedBox(height: 20),
-                  DesTitle(title: 'Enter Phone Number'),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 20),
+                  const DesTitle(title: 'Phone Number'),
+                  const SizedBox(height: 5),
                   CustomTextField(
-                    hintText: 'Input your Number',
+                    hintText: 'Input your number',
                     validator: _validatePhone,
                     controller: _phoneController,
                   ),
-                  SizedBox(height: 20),
-                  DesTitle(title: 'Password'),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 20),
+                  const DesTitle(title: 'Password'),
+                  const SizedBox(height: 5),
                   CustomTextField(
                     hintText: 'Input new password',
                     validator: _validatePassword,
                     controller: _passController,
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   CustomButton(
                     title: 'Sign Up',
-                    onTap: _signUp,
+                    onTap: _signUp, // Directly calling _signUp method
                   ),
                 ],
               ),

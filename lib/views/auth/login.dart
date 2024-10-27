@@ -43,12 +43,11 @@ class _LoginScreenState extends State<LoginScreen> {
         // Sign in with Firebase
         UserCredential userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passController.text,
+          email: _emailController.text.trim(),
+          password: _passController.text.trim(),
         );
 
         if (userCredential.user != null) {
-          // Navigate to home if login is successful
           Get.to(() => const HomaPage());
         }
       } on FirebaseAuthException catch (e) {
